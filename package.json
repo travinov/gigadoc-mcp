@@ -1,0 +1,31 @@
+{
+  "name": "qwen-sber-doc-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Sber-style Python module documentation in Qwen CLI.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "bin": {
+    "qwen-sber-doc-mcp": "dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsx --test test/**/*.test.ts",
+    "start": "node dist/src/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "qwen",
+    "documentation",
+    "python"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
