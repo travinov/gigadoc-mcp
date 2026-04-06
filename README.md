@@ -2,6 +2,12 @@
 
 MCP server для Qwen CLI, который автоматизирует анализ Python-кода и контроль качества документации.
 
+## Публичные ссылки
+
+1. Репозиторий MCP server: [https://github.com/travinov/qwen-sber-doc-mcp](https://github.com/travinov/qwen-sber-doc-mcp)
+2. Репозиторий extension: [https://github.com/travinov/qwen-sber-doc-extension](https://github.com/travinov/qwen-sber-doc-extension)
+3. Форк с документированным модулем: [https://github.com/travinov/claw-code](https://github.com/travinov/claw-code)
+
 ## Зачем это нужно
 
 Сервер решает две основные проблемы:
@@ -45,7 +51,7 @@ MCP server для Qwen CLI, который автоматизирует анал
 2. Python 3.x в `PATH`
 
 ```bash
-git clone <MCP_REPO_URL> qwen-sber-doc-mcp
+git clone https://github.com/travinov/qwen-sber-doc-mcp.git qwen-sber-doc-mcp
 cd qwen-sber-doc-mcp
 npm install
 npm run build
