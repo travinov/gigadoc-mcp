@@ -4,8 +4,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-import { analyzePythonModule } from "./pythonAnalyzer.js";
-import { buildSberDocOutline } from "./outline.js";
+import { analyzePythonModule, analyzePythonTarget } from "./pythonAnalyzer.js";
+import { buildSberDocOutline, buildSberProjectOutline } from "./outline.js";
 import { validateSberDoc } from "./validator.js";
 
 function asTextContent(payload: unknown) {
@@ -21,7 +21,7 @@ function asTextContent(payload: unknown) {
 
 const server = new McpServer({
   name: "qwen-sber-doc-mcp",
-  version: "0.1.0",
+  version: "0.2.0",
 });
 
 server.registerTool(
@@ -36,6 +36,20 @@ server.registerTool(
 );
 
 server.registerTool(
+  "analyze_python_target",
+  {
+    description: "Analyzes a Python file or a directory with Python modules. Returns either module or project-level analysis.",
+    inputSchema: z
+      .object({
+        path: z.string().min(1),
+        max_modules: z.number().int().positive().max(1000).optional(),
+      })
+      .shape,
+  },
+  async ({ path, max_modules }) => asTextContent(analyzePythonTarget(path, max_modules ?? 200))
+);
+
+server.registerTool(
   "build_sber_doc_outline",
   {
     description: "Builds a strict Sber-style documentation outline from a Python module analysis result.",
@@ -47,6 +61,19 @@ server.registerTool(
   async ({ module_name, analysis }) => {
     return asTextContent(buildSberDocOutline(module_name, analysis as Parameters<typeof buildSberDocOutline>[1]));
   }
+);
+
+server.registerTool(
+  "build_sber_project_outline",
+  {
+    description: "Builds a strict Sber-style project documentation outline from project-level Python analysis.",
+    inputSchema: z.object({
+      project_name: z.string().min(1),
+      analysis: z.unknown(),
+    }).shape,
+  },
+  async ({ project_name, analysis }) =>
+    asTextContent(buildSberProjectOutline(project_name, analysis as Parameters<typeof buildSberProjectOutline>[1]))
 );
 
 server.registerTool(

@@ -33,6 +33,34 @@ export interface PythonModuleAnalysis {
   functions: PythonFunction[];
 }
 
+export interface PythonProjectModuleSummary {
+  moduleName: string;
+  path: string;
+  publicClassCount: number;
+  publicFunctionCount: number;
+}
+
+export interface PythonProjectAnalysis {
+  targetPath: string;
+  projectName: string;
+  moduleCount: number;
+  totalClasses: number;
+  totalFunctions: number;
+  totalPublicFunctions: number;
+  modules: PythonModuleAnalysis[];
+  moduleSummaries: PythonProjectModuleSummary[];
+}
+
+export type PythonTargetAnalysis =
+  | {
+      kind: "module";
+      module: PythonModuleAnalysis;
+    }
+  | {
+      kind: "project";
+      project: PythonProjectAnalysis;
+    };
+
 export interface OutlineSection {
   title: string;
   bullets: string[];

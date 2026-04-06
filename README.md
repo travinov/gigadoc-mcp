@@ -1,6 +1,7 @@
 # Qwen Sber Doc MCP
 
 MCP server для Qwen CLI, который автоматизирует анализ Python-кода и контроль качества документации.
+Поддерживает как отдельные `.py` файлы, так и директории проекта.
 
 ## Публичные ссылки
 
@@ -31,11 +32,21 @@ MCP server для Qwen CLI, который автоматизирует анал
 Вход: `{"path":".../module.py"}`
 Выход: структурированный JSON с сущностями модуля.
 
-2. `build_sber_doc_outline`
+2. `analyze_python_target`
+Вход: `{"path":".../module.py"}` или `{"path":".../project_dir","max_modules":200}`
+Выход:
+- `kind=module` с анализом одного файла;
+- `kind=project` с обзором проекта, списком модулей и агрегированными метриками.
+
+3. `build_sber_doc_outline`
 Вход: `{"module_name":"query_engine","analysis":{...}}`
 Выход: строгий каркас документа с обязательными разделами.
 
-3. `validate_sber_doc`
+4. `build_sber_project_outline`
+Вход: `{"project_name":"my_project","analysis":{...}}`
+Выход: каркас проектной документации для директории.
+
+5. `validate_sber_doc`
 Вход: `{"markdown":"# ..."}`
 Выход: `ok` + список нарушений/предупреждений.
 
@@ -102,8 +113,8 @@ npx --yes qwen-sber-doc-mcp
 ## Практические сценарии
 
 1. Перед написанием docs:
-   - `analyze_python_module` -> получить факты по API.
+   - `analyze_python_target` -> получить факты по модулю или проекту.
 2. Перед генерацией Markdown:
-   - `build_sber_doc_outline` -> получить разделы и чек-лист.
+   - `build_sber_doc_outline` или `build_sber_project_outline` -> получить разделы и чек-лист.
 3. Перед публикацией:
    - `validate_sber_doc` -> обнаружить пропуски структуры/примеров.

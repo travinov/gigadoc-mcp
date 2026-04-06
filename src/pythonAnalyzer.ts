@@ -2,7 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-import type { PythonModuleAnalysis } from "./types.js";
+import type {
+  PythonModuleAnalysis,
+  PythonProjectAnalysis,
+  PythonProjectModuleSummary,
+  PythonTargetAnalysis,
+} from "./types.js";
 
 const PYTHON_AST_SCRIPT = String.raw`
 import ast
@@ -106,7 +111,17 @@ payload = {
 print(json.dumps(payload, ensure_ascii=False))
 `;
 
-export function analyzePythonModule(filePath: string): PythonModuleAnalysis {
+const EXCLUDED_DIRS = new Set([
+  ".git",
+  ".venv",
+  "venv",
+  "__pycache__",
+  "node_modules",
+  "dist",
+  "build",
+]);
+
+function resolvePythonFile(filePath: string): string {
   const resolvedPath = path.resolve(filePath);
   if (!fs.existsSync(resolvedPath)) {
     throw new Error(`Python module not found: ${resolvedPath}`);
@@ -114,7 +129,10 @@ export function analyzePythonModule(filePath: string): PythonModuleAnalysis {
   if (path.extname(resolvedPath) !== ".py") {
     throw new Error(`Expected a Python file, got: ${resolvedPath}`);
   }
+  return resolvedPath;
+}
 
+function parsePythonModule(resolvedPath: string): PythonModuleAnalysis {
   const result = spawnSync("python3", ["-c", PYTHON_AST_SCRIPT, resolvedPath], {
     encoding: "utf-8",
   });
@@ -127,4 +145,99 @@ export function analyzePythonModule(filePath: string): PythonModuleAnalysis {
   }
 
   return JSON.parse(result.stdout) as PythonModuleAnalysis;
+}
+
+function collectPythonFiles(rootPath: string, maxModules: number): string[] {
+  const files: string[] = [];
+  const stack = [rootPath];
+
+  while (stack.length > 0 && files.length < maxModules) {
+    const current = stack.pop();
+    if (!current) {
+      continue;
+    }
+
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+
+      if (entry.isDirectory()) {
+        if (!EXCLUDED_DIRS.has(entry.name)) {
+          stack.push(fullPath);
+        }
+        continue;
+      }
+
+      if (entry.isFile() && entry.name.endsWith(".py")) {
+        files.push(fullPath);
+        if (files.length >= maxModules) {
+          break;
+        }
+      }
+    }
+  }
+
+  files.sort();
+  return files;
+}
+
+function toProjectAnalysis(targetPath: string, modules: PythonModuleAnalysis[]): PythonProjectAnalysis {
+  const moduleSummaries: PythonProjectModuleSummary[] = modules.map((moduleItem) => {
+    const publicFunctionCount =
+      moduleItem.functions.filter((item) => item.visibility === "public").length +
+      moduleItem.classes.reduce(
+        (count, classItem) =>
+          count + classItem.methods.filter((method) => method.visibility === "public").length,
+        0
+      );
+
+    return {
+      moduleName: moduleItem.moduleName,
+      path: moduleItem.path,
+      publicClassCount: moduleItem.classes.length,
+      publicFunctionCount,
+    };
+  });
+
+  return {
+    targetPath,
+    projectName: path.basename(targetPath),
+    moduleCount: modules.length,
+    totalClasses: modules.reduce((count, moduleItem) => count + moduleItem.classes.length, 0),
+    totalFunctions: modules.reduce((count, moduleItem) => count + moduleItem.functions.length, 0),
+    totalPublicFunctions: moduleSummaries.reduce((count, item) => count + item.publicFunctionCount, 0),
+    modules,
+    moduleSummaries,
+  };
+}
+
+export function analyzePythonModule(filePath: string): PythonModuleAnalysis {
+  return parsePythonModule(resolvePythonFile(filePath));
+}
+
+export function analyzePythonTarget(targetPath: string, maxModules = 200): PythonTargetAnalysis {
+  const resolvedPath = path.resolve(targetPath);
+  if (!fs.existsSync(resolvedPath)) {
+    throw new Error(`Target path not found: ${resolvedPath}`);
+  }
+
+  const targetStat = fs.statSync(resolvedPath);
+  if (targetStat.isFile()) {
+    return { kind: "module", module: analyzePythonModule(resolvedPath) };
+  }
+
+  if (!targetStat.isDirectory()) {
+    throw new Error(`Target is not a file or directory: ${resolvedPath}`);
+  }
+
+  const files = collectPythonFiles(resolvedPath, maxModules);
+  if (files.length === 0) {
+    throw new Error(`No Python files found in directory: ${resolvedPath}`);
+  }
+
+  const modules = files.map((item) => parsePythonModule(item));
+  return {
+    kind: "project",
+    project: toProjectAnalysis(resolvedPath, modules),
+  };
 }

@@ -1,9 +1,11 @@
 import path from "node:path";
+import fs from "node:fs";
+import os from "node:os";
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { analyzePythonModule } from "../src/pythonAnalyzer.js";
-import { buildSberDocOutline } from "../src/outline.js";
+import { analyzePythonModule, analyzePythonTarget } from "../src/pythonAnalyzer.js";
+import { buildSberDocOutline, buildSberProjectOutline } from "../src/outline.js";
 import { validateSberDoc } from "../src/validator.js";
 
 const queryEnginePath = path.resolve(
@@ -29,6 +31,43 @@ test("build_sber_doc_outline returns required sections", () => {
   assert.equal(outline.moduleName, "query_engine");
   assert.ok(outline.sections.some((section) => section.title === "Назначение"));
   assert.ok(outline.sections.some((section) => section.title === "Примеры использования"));
+});
+
+test("analyze_python_target supports module and directory", () => {
+  const moduleAnalysis = analyzePythonTarget(queryEnginePath);
+  assert.equal(moduleAnalysis.kind, "module");
+  if (moduleAnalysis.kind === "module") {
+    assert.equal(moduleAnalysis.module.moduleName, "query_engine");
+  }
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "qwen-sber-doc-"));
+  const moduleA = path.join(tempDir, "alpha.py");
+  const moduleB = path.join(tempDir, "beta.py");
+  fs.writeFileSync(moduleA, "class Alpha:\n    def run(self):\n        return 1\n");
+  fs.writeFileSync(moduleB, "def helper(value):\n    return value\n");
+
+  const projectAnalysis = analyzePythonTarget(tempDir);
+  assert.equal(projectAnalysis.kind, "project");
+  if (projectAnalysis.kind === "project") {
+    assert.equal(projectAnalysis.project.moduleCount, 2);
+    assert.ok(projectAnalysis.project.moduleSummaries.some((item) => item.moduleName === "alpha"));
+  }
+});
+
+test("build_sber_project_outline returns project sections", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "qwen-sber-doc-outline-"));
+  fs.writeFileSync(path.join(tempDir, "main.py"), "def entrypoint():\n    return 'ok'\n");
+
+  const analysis = analyzePythonTarget(tempDir);
+  assert.equal(analysis.kind, "project");
+  if (analysis.kind !== "project") {
+    throw new Error("Expected project analysis for directory target");
+  }
+
+  const outline = buildSberProjectOutline("demo_project", analysis.project);
+  assert.equal(outline.moduleName, "demo_project");
+  assert.ok(outline.sections.some((section) => section.title === "Структура директории"));
+  assert.ok(outline.sections.some((section) => section.title === "Публичные точки входа"));
 });
 
 test("validate_sber_doc reports structural problems", () => {

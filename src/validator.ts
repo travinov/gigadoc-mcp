@@ -1,12 +1,12 @@
 import type { ValidationIssue, ValidationResult } from "./types.js";
 
-const REQUIRED_SECTIONS = [
-  "Назначение",
-  "Основные сущности",
-  "Публичные методы",
-  "Параметры",
-  "Примеры использования",
-  "Практические замечания",
+const REQUIRED_SECTION_VARIANTS = [
+  ["Назначение"],
+  ["Основные сущности"],
+  ["Публичные методы", "Публичные методы и функции", "Публичные точки входа"],
+  ["Параметры", "Параметры и возвращаемые значения", "Параметры и интерфейсы"],
+  ["Примеры использования"],
+  ["Практические замечания"],
 ];
 
 const COLLOQUIAL_MARKERS = [
@@ -21,12 +21,12 @@ const COLLOQUIAL_MARKERS = [
 export function validateSberDoc(markdown: string): ValidationResult {
   const issues: ValidationIssue[] = [];
 
-  for (const section of REQUIRED_SECTIONS) {
-    if (!markdown.includes(section)) {
+  for (const sectionVariants of REQUIRED_SECTION_VARIANTS) {
+    if (!sectionVariants.some((section) => markdown.includes(section))) {
       issues.push({
         code: "missing-section",
         level: "error",
-        message: `Отсутствует обязательный раздел: ${section}.`,
+        message: `Отсутствует обязательный раздел (ожидался один из: ${sectionVariants.join(", ")}).`,
       });
     }
   }

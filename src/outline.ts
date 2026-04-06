@@ -1,4 +1,11 @@
-import type { OutlineSection, PythonClass, PythonFunction, PythonModuleAnalysis, SberDocOutline } from "./types.js";
+import type {
+  OutlineSection,
+  PythonClass,
+  PythonFunction,
+  PythonModuleAnalysis,
+  PythonProjectAnalysis,
+  SberDocOutline,
+} from "./types.js";
 
 function describeFunction(item: PythonFunction): string {
   const params = item.parameters.map((parameter) => parameter.name).join(", ") || "без параметров";
@@ -74,6 +81,77 @@ export function buildSberDocOutline(
   return {
     moduleName,
     recommendedTitle: `Модуль \`${moduleName}\``,
+    sections,
+  };
+}
+
+export function buildSberProjectOutline(
+  projectName: string,
+  analysis: PythonProjectAnalysis
+): SberDocOutline {
+  const topModules = [...analysis.moduleSummaries]
+    .sort((a, b) => b.publicFunctionCount - a.publicFunctionCount)
+    .slice(0, 10);
+
+  const moduleBullets = topModules.map(
+    (item) =>
+      `\`${item.moduleName}\`: публичные классы ${item.publicClassCount}, публичные функции/методы ${item.publicFunctionCount}.`
+  );
+
+  const sections: OutlineSection[] = [
+    {
+      title: "Назначение",
+      bullets: [
+        `Опишите назначение проекта \`${projectName}\` и его целевой контекст использования.`,
+        `Зафиксируйте границы анализа: директория \`${analysis.targetPath}\`.`,
+      ],
+    },
+    {
+      title: "Структура директории",
+      bullets: [
+        `Всего Python-модулей: ${analysis.moduleCount}.`,
+        "Выделите ключевые директории и роль каждого блока.",
+      ],
+    },
+    {
+      title: "Основные сущности",
+      bullets:
+        moduleBullets.length > 0
+          ? moduleBullets
+          : ["Выделите ключевые модули и их публичные сущности."],
+    },
+    {
+      title: "Публичные точки входа",
+      bullets: [
+        `Суммарно найдено публичных функций и методов: ${analysis.totalPublicFunctions}.`,
+        "Опишите важные точки входа по модулям и их ответственность.",
+      ],
+    },
+    {
+      title: "Параметры и интерфейсы",
+      bullets: [
+        "Для ключевых публичных методов приведите таблицы параметров.",
+        "Зафиксируйте возвращаемые значения и ограничения вызова.",
+      ],
+    },
+    {
+      title: "Примеры использования",
+      bullets: [
+        "Добавьте 2-3 сценария: запуск, интеграция, типовой рабочий поток.",
+        "Приведите примеры только из наблюдаемого кода и тестов.",
+      ],
+    },
+    {
+      title: "Практические замечания",
+      bullets: [
+        "Отразите риски, ограничения и рекомендации по развитию документации проекта.",
+      ],
+    },
+  ];
+
+  return {
+    moduleName: projectName,
+    recommendedTitle: `Проект \`${projectName}\``,
     sections,
   };
 }
