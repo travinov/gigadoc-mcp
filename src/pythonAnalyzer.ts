@@ -181,7 +181,11 @@ function collectPythonFiles(rootPath: string, maxModules: number): string[] {
   return files;
 }
 
-function toProjectAnalysis(targetPath: string, modules: PythonModuleAnalysis[]): PythonProjectAnalysis {
+function toProjectAnalysis(
+  targetPath: string,
+  modules: PythonModuleAnalysis[],
+  includeModules: boolean
+): PythonProjectAnalysis {
   const moduleSummaries: PythonProjectModuleSummary[] = modules.map((moduleItem) => {
     const publicFunctionCount =
       moduleItem.functions.filter((item) => item.visibility === "public").length +
@@ -206,7 +210,7 @@ function toProjectAnalysis(targetPath: string, modules: PythonModuleAnalysis[]):
     totalClasses: modules.reduce((count, moduleItem) => count + moduleItem.classes.length, 0),
     totalFunctions: modules.reduce((count, moduleItem) => count + moduleItem.functions.length, 0),
     totalPublicFunctions: moduleSummaries.reduce((count, item) => count + item.publicFunctionCount, 0),
-    modules,
+    modules: includeModules ? modules : [],
     moduleSummaries,
   };
 }
@@ -215,7 +219,11 @@ export function analyzePythonModule(filePath: string): PythonModuleAnalysis {
   return parsePythonModule(resolvePythonFile(filePath));
 }
 
-export function analyzePythonTarget(targetPath: string, maxModules = 200): PythonTargetAnalysis {
+export function analyzePythonTarget(
+  targetPath: string,
+  maxModules = 200,
+  includeModules = true
+): PythonTargetAnalysis {
   const resolvedPath = path.resolve(targetPath);
   if (!fs.existsSync(resolvedPath)) {
     throw new Error(`Target path not found: ${resolvedPath}`);
@@ -238,6 +246,6 @@ export function analyzePythonTarget(targetPath: string, maxModules = 200): Pytho
   const modules = files.map((item) => parsePythonModule(item));
   return {
     kind: "project",
-    project: toProjectAnalysis(resolvedPath, modules),
+    project: toProjectAnalysis(resolvedPath, modules, includeModules),
   };
 }

@@ -38,15 +38,18 @@ server.registerTool(
 server.registerTool(
   "analyze_python_target",
   {
-    description: "Analyzes a Python file or a directory with Python modules. Returns either module or project-level analysis.",
+    description:
+      "Analyzes a Python file or a directory with Python modules. For large projects use include_modules=false to reduce context size.",
     inputSchema: z
       .object({
         path: z.string().min(1),
         max_modules: z.number().int().positive().max(1000).optional(),
+        include_modules: z.boolean().optional(),
       })
       .shape,
   },
-  async ({ path, max_modules }) => asTextContent(analyzePythonTarget(path, max_modules ?? 200))
+  async ({ path, max_modules, include_modules }) =>
+    asTextContent(analyzePythonTarget(path, max_modules ?? 200, include_modules ?? true))
 );
 
 server.registerTool(

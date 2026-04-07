@@ -54,6 +54,21 @@ test("analyze_python_target supports module and directory", () => {
   }
 });
 
+test("analyze_python_target supports compact project mode", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gigadoc-compact-"));
+  fs.writeFileSync(path.join(tempDir, "alpha.py"), "def run():\n    return 1\n");
+  fs.writeFileSync(path.join(tempDir, "beta.py"), "class Beta:\n    def execute(self):\n        return 2\n");
+
+  const analysis = analyzePythonTarget(tempDir, 200, false);
+  assert.equal(analysis.kind, "project");
+  if (analysis.kind === "project") {
+    assert.equal(analysis.project.modules.length, 0);
+    assert.equal(analysis.project.moduleCount, 2);
+    assert.equal(analysis.project.moduleSummaries.length, 2);
+    assert.ok(analysis.project.totalPublicFunctions >= 2);
+  }
+});
+
 test("build_sber_project_outline returns project sections", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gigadoc-outline-"));
   fs.writeFileSync(path.join(tempDir, "main.py"), "def entrypoint():\n    return 'ok'\n");
