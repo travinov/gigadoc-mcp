@@ -20,8 +20,8 @@ function asTextContent(payload: unknown) {
 }
 
 const server = new McpServer({
-  name: "qwen-sber-doc-mcp",
-  version: "0.3.0",
+  name: "gigadoc-mcp",
+  version: "0.4.0",
 });
 
 server.registerTool(

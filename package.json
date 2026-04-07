@@ -1,11 +1,11 @@
 {
-  "name": "qwen-sber-doc-mcp",
-  "version": "0.3.0",
-  "description": "MCP server for Sber-style Python module documentation in Qwen CLI.",
+  "name": "gigadoc-mcp",
+  "version": "0.4.0",
+  "description": "MCP server for Gigadoc-style Python documentation in Gigacode/Gemini/Qwen CLI.",
   "type": "module",
   "main": "dist/src/index.js",
   "bin": {
-    "qwen-sber-doc-mcp": "dist/src/index.js"
+    "gigadoc-mcp": "dist/src/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -14,6 +14,8 @@
   },
   "keywords": [
     "mcp",
+    "gigacode",
+    "gemini",
     "qwen",
     "documentation",
     "python"

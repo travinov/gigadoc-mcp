@@ -1,15 +1,15 @@
-# Sber Doc MCP (Gigacode/Gemini + Qwen)
+# Gigadoc MCP (Gigacode/Gemini + Qwen)
 
 MCP server для Gigacode/Gemini/Qwen CLI, который автоматизирует анализ Python-кода и контроль качества документации.
 Поддерживает как отдельные `.py` файлы, так и директории проекта.
 
 ## Публичные ссылки
 
-1. Репозиторий MCP server: [https://github.com/travinov/qwen-sber-doc-mcp](https://github.com/travinov/qwen-sber-doc-mcp)
-2. Репозиторий extension: [https://github.com/travinov/qwen-sber-doc-extension](https://github.com/travinov/qwen-sber-doc-extension)
+1. Репозиторий MCP server: [https://github.com/travinov/gigadoc-mcp](https://github.com/travinov/gigadoc-mcp)
+2. Репозиторий extension: [https://github.com/travinov/gigadoc-extension](https://github.com/travinov/gigadoc-extension)
 3. Форк с документированным модулем: [https://github.com/travinov/claw-code](https://github.com/travinov/claw-code)
-4. Релиз MCP `v0.3.0`: [https://github.com/travinov/qwen-sber-doc-mcp/releases/tag/v0.3.0](https://github.com/travinov/qwen-sber-doc-mcp/releases/tag/v0.3.0)
-5. npm-пакет: [https://www.npmjs.com/package/qwen-sber-doc-mcp](https://www.npmjs.com/package/qwen-sber-doc-mcp)
+4. Релиз MCP `v0.3.0`: [https://github.com/travinov/gigadoc-mcp/releases/tag/v0.3.0](https://github.com/travinov/gigadoc-mcp/releases/tag/v0.3.0)
+5. npm-пакет: [https://www.npmjs.com/package/gigadoc-mcp](https://www.npmjs.com/package/gigadoc-mcp)
 
 ## Зачем это нужно
 
@@ -64,8 +64,8 @@ MCP server для Gigacode/Gemini/Qwen CLI, который автоматизи�
 2. Python 3.x в `PATH`
 
 ```bash
-git clone https://github.com/travinov/qwen-sber-doc-mcp.git qwen-sber-doc-mcp
-cd qwen-sber-doc-mcp
+git clone https://github.com/travinov/gigadoc-mcp.git gigadoc-mcp
+cd gigadoc-mcp
 npm install
 npm run build
 npm test
@@ -80,7 +80,7 @@ node dist/src/index.js
 После публикации в npm можно использовать пакет без клонирования:
 
 ```bash
-npx --yes qwen-sber-doc-mcp
+npx --yes gigadoc-mcp
 ```
 
 ## Подключение к CLI (Gigacode/Gemini/Qwen)
@@ -92,7 +92,7 @@ npx --yes qwen-sber-doc-mcp
   "mcpServers": {
     "sber-doc-mcp": {
       "command": "node",
-      "args": ["/absolute/path/to/qwen-sber-doc-mcp/dist/src/index.js"],
+      "args": ["/absolute/path/to/gigadoc-mcp/dist/src/index.js"],
       "timeout": 15000
     }
   }
@@ -101,7 +101,7 @@ npx --yes qwen-sber-doc-mcp
 
 Или используйте companion extension:
 
-- `qwen-sber-doc-extension` содержит launcher и готовую команду `/doc:sber`.
+- `gigadoc-extension` содержит launcher и готовую команду `/doc:sber`.
 
 ## Примеры типовых задач
 

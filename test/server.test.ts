@@ -40,7 +40,7 @@ test("analyze_python_target supports module and directory", () => {
     assert.equal(moduleAnalysis.module.moduleName, "query_engine");
   }
 
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "qwen-sber-doc-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gigadoc-"));
   const moduleA = path.join(tempDir, "alpha.py");
   const moduleB = path.join(tempDir, "beta.py");
   fs.writeFileSync(moduleA, "class Alpha:\n    def run(self):\n        return 1\n");
@@ -55,7 +55,7 @@ test("analyze_python_target supports module and directory", () => {
 });
 
 test("build_sber_project_outline returns project sections", () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "qwen-sber-doc-outline-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gigadoc-outline-"));
   fs.writeFileSync(path.join(tempDir, "main.py"), "def entrypoint():\n    return 'ok'\n");
 
   const analysis = analyzePythonTarget(tempDir);
